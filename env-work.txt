@@ -1,0 +1,10 @@
+export DEBUG="True"
+export CELERY_BROKER_URL="redis://redis:6379/0"
+export CELERY_RESULT_BACKEND="redis://redis:6379/0"
+export DJANGO_DB="postgresql"
+export POSTGRES_HOST="db"
+export POSTGRES_NAME="postgres"
+export POSTGRES_USER="postgres"
+export POSTGRES_PASSWORD="postgres"
+export POSTGRES_PORT="5432"
+
