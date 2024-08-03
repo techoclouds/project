@@ -43,9 +43,9 @@
 
 #### Create and Push `develop` Branch
 
-1. **Create `develop` Branch**:
+1. **Create `develop` (from `main`) Branch**:
    ```bash
-   git checkout -b develop
+   git checkout -b develop 
    ```
 
 2. **Push `develop` Branch**:
@@ -55,18 +55,18 @@
 
 #### Create and Push Feature Branches
 
-1. **Create a Feature Branch**:
+1. **Create a Feature Branch (from `develop`) **:
    ```bash
-   git checkout -b feature/new-feature
+   git checkout -b feature/new-feature 
    ```
 
 2. **Work on Your Feature**:
    - Make changes and commit them:
- 	```bash
- 	# Make your changes
- 	git add .
- 	git commit -m "Add new feature"
- 	```
+   ```bash
+   # Make your changes
+   git add .
+   git commit -m "Add new feature"
+   ```
 
 3. **Push Feature Branch**:
    ```bash
@@ -75,17 +75,17 @@
 
 #### Create and Push Release Branches
 
-1. **Create a Release Branch**:
+1. **Create a Release Branch (from `develop`)**:
    ```bash
-   git checkout -b release/1.0.0 develop
+   git checkout -b release/1.0.0 
    ```
 
 2. **Prepare for Release**:
    - Make release-related changes, then commit them:
- 	```bash
- 	git add .
- 	git commit -m "Prepare for release 1.0.0"
- 	```
+   ```bash
+   git add .
+   git commit -m "Prepare for release 1.0.0"
+   ```
 
 3. **Push Release Branch**:
    ```bash
@@ -94,17 +94,17 @@
 
 #### Create and Push Hotfix Branches
 
-1. **Create a Hotfix Branch**:
+1. **Create a Hotfix Branch (from `main`)**:
    ```bash
-   git checkout -b hotfix/1.0.1 master
+   git checkout -b hotfix/1.0.1 
    ```
 
 2. **Apply Hotfix**:
    - Make changes and commit them:
- 	```bash
- 	git add .
- 	git commit -m "Fix critical issue in 1.0.0"
- 	```
+   ```bash
+   git add .
+   git commit -m "Fix critical issue in 1.0.0"
+   ```
 
 3. **Push Hotfix Branch**:
    ```bash
@@ -125,15 +125,15 @@
    git push origin develop
    ```
 
-#### Merge Release Branch into `master` and `develop`
+#### Merge Release Branch into `main` and `develop`
 
-1. **Merge Release Branch into `master`**:
+1. **Merge Release Branch into `main`**:
    ```bash
-   git checkout master
-   git pull origin master
+   git checkout main
+   git pull origin main
    git merge release/1.0.0
    git tag -a v1.0.0 -m "Release version 1.0.0"
-   git push origin master --tags
+   git push origin main --tags
    ```
 
 2. **Merge Release Branch into `develop`**:
@@ -144,15 +144,15 @@
    git push origin develop
    ```
 
-#### Merge Hotfix Branch into `master` and `develop`
+#### Merge Hotfix Branch into `main` and `develop`
 
-1. **Merge Hotfix Branch into `master`**:
+1. **Merge Hotfix Branch into `main`**:
    ```bash
-   git checkout master
-   git pull origin master
+   git checkout main
+   git pull origin main
    git merge hotfix/1.0.1
    git tag -a v1.0.1 -m "Hotfix version 1.0.1"
-   git push origin master --tags
+   git push origin main --tags
    ```
 
 2. **Merge Hotfix Branch into `develop`**:
@@ -192,5 +192,3 @@
 - **Clone and Branch**: Clone the repo, then create and manage branches (`develop`, `feature`, `release`, `hotfix`).
 - **Merge**: Merge branches as necessary.
 - **Tag and Release**: Create tags for versions, then create releases on GitHub.
-
-
