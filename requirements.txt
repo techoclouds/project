@@ -1,9 +1,3 @@
-django
+Flask
+psycopg2
 
-djangorestframework
-markdown
-django-filter
-
-celery[redis]
-
-psycopg2-binary
