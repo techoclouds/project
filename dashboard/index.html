@@ -23,9 +23,10 @@
     <div class="card p-4 mt-4">
         <h4>Search URLs</h4>
         <div class="input-group">
-            <input type="text" id="search_query" class="form-control" placeholder="Search URLs, Titles, or Descriptions...">
-            <button class="btn btn-success" onclick="searchURLs()">Search</button>
+            <input type="text" id="search_query" class="form-control" placeholder="Search URLs, Titles, Descriptions, or Full Text...">
+            <button class="btn btn-success" onclick="searchURLs(true)">Search</button>
         </div>
+        <p class="mt-2"><strong>Total Results: </strong><span id="total_results">0</span></p>
     </div>
     
     <!-- Search Results Table -->
@@ -39,15 +40,20 @@
                     <th>Title</th>
                     <th>Description</th>
                     <th>Word Count</th>
+                    <th>Full Text</th>
                 </tr>
             </thead>
             <tbody id="results_table">
-                <tr><td colspan="5" class="text-center">No results yet</td></tr>
+                <tr><td colspan="6" class="text-center">No results yet</td></tr>
             </tbody>
         </table>
+        <button class="btn btn-primary d-none" id="load_more" onclick="searchURLs(false)">Load More</button>
     </div>
 
     <script>
+        let currentPage = 1;
+        let lastQuery = "";
+
         async function shortenURL() {
             let long_url = document.getElementById("long_url").value;
             if (!long_url) return alert("Please enter a URL");
@@ -68,7 +74,7 @@
                     event.preventDefault();
                     window.location.href = data.short_url; // Ensure correct redirection
                 };
-
+                
                 let resultDiv = document.getElementById("shortened_url");
                 resultDiv.innerHTML = "";
                 resultDiv.appendChild(shortenedURL);
@@ -77,36 +83,83 @@
             }
         }
 
-        async function searchURLs() {
+        async function searchURLs(resetPage = true) {
             let query = document.getElementById("search_query").value;
-            if (!query) return alert("Please enter a search term");
-
-            let response = await fetch(`/api/search?q=${query}`);
-            let data = await response.json();
-
             let table = document.getElementById("results_table");
-            table.innerHTML = "";
+            let totalResultsText = document.getElementById("total_results");
+            let loadMoreBtn = document.getElementById("load_more");
 
-            if (data.length === 0) {
-                table.innerHTML = `<tr><td colspan="5" class="text-center">No results found</td></tr>`;
+            if (resetPage) {
+                currentPage = 1;
+                lastQuery = query;
+                table.innerHTML = `<tr><td colspan="6" class="text-center">Searching...</td></tr>`;
+            } else {
+                currentPage++;
+            }
+
+            if (!query) {
+                alert("Please enter a search term");
                 return;
             }
 
-            data.forEach(url => {
-                let row = `<tr>
-                    <td><a href="/go/${url.short_code}" onclick="redirectURL(event, '${url.short_code}')">${url.short_code}</a></td>
-                    <td>${url.long_url}</td>
-                    <td>${url.title || "N/A"}</td>
-                    <td>${url.description || "N/A"}</td>
-                    <td>${url.word_count || "N/A"}</td>
-                </tr>`;
-                table.innerHTML += row;
-            });
+            try {
+                let response = await fetch(`/api/search?q=${encodeURIComponent(query)}&page=${currentPage}&size=50`);
+                let data = await response.json();
+
+                totalResultsText.textContent = data.total_results;
+                if (resetPage) table.innerHTML = ""; // Clear previous results
+
+                if (data.data.length === 0) {
+                    table.innerHTML = `<tr><td colspan="6" class="text-center">No results found</td></tr>`;
+                    return;
+                }
+
+                data.data.forEach(url => {
+                    let truncatedText = url.full_text.length > 100 ? url.full_text.substring(0, 100) + "..." : url.full_text;
+                    let fullText = url.full_text;
+
+                    let row = `<tr>
+                        <td><a href="/go/${url.short_code}" target="_blank">${url.short_code}</a></td>
+                        <td><a href="${url.long_url}" target="_blank">${url.long_url}</a></td>
+                        <td>${url.title || "N/A"}</td>
+                        <td>${url.description || "N/A"}</td>
+                        <td>${url.word_count || "N/A"}</td>
+                        <td>
+                            <span id="text-preview-${url.short_code}">${truncatedText}</span>
+                            <button class="btn btn-link p-0" onclick="toggleFullText('${url.short_code}')">Show More</button>
+                            <span id="full-text-${url.short_code}" style="display: none;">${fullText}</span>
+                        </td>
+                    </tr>`;
+                    table.innerHTML += row;
+                });
+
+                // Show or hide "Load More" button
+                if (data.total_results > currentPage * 50) {
+                    loadMoreBtn.classList.remove("d-none");
+                } else {
+                    loadMoreBtn.classList.add("d-none");
+                }
+
+            } catch (error) {
+                alert("Error fetching search results!");
+                console.error("Search error:", error);
+            }
         }
 
-        function redirectURL(event, shortCode) {
-            event.preventDefault();
-            window.location.href = `/go/${shortCode}`;
+        function toggleFullText(shortCode) {
+            let preview = document.getElementById(`text-preview-${shortCode}`);
+            let fullText = document.getElementById(`full-text-${shortCode}`);
+            let button = preview.nextElementSibling;
+
+            if (fullText.style.display === "none") {
+                preview.style.display = "none";
+                fullText.style.display = "inline";
+                button.innerText = "Show Less";
+            } else {
+                preview.style.display = "inline";
+                fullText.style.display = "none";
+                button.innerText = "Show More";
+            }
         }
     </script>
 </body>
